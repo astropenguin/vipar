@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" ?>
+<casaxml xmlns="http://casa.nrao.edu/schema/psetTypes.html"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
+file:///opt/casa/code/xmlcasa/xml/casa.xsd">
+
+<task type="function" name="mbclose" category="file">
+
+    <shortdescription>close an existing MBFITS</shortdescription>
+
+    <description>
+    close an existing MBFITS
+    </description>
+
+    <input></input>
+
+    <example>
+        mbclose()
+    </example>
+
+</task>
+
+</casaxml>
