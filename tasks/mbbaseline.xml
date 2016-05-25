@@ -13,19 +13,17 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
     <input>
 
-        <param type="string" name="mbfits" mustexist="true">
+        <param type="string" name="mbfits">
             <description>input MBFITS name</description>
             <value></value>
         </param>
 
-        <param type="string" name="mode" mustexist="true">
+        <param type="string" name="mode">
             <description>baseline fit mode</description>
             <value>median</value>
         </param>
 
     </input>
-
-    <return type="void"/>
 
     <example>
         write an example here

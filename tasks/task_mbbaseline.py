@@ -2,7 +2,9 @@
 
 import os
 import sys
+import inspect
 from taskinit import *
 
-def mbbaseline(mbfits, mode):
-    pass
+def mbbaseline(mbfits=None, mode=None):
+    casalog.origin('mbbaseline')
+    casaglobals = sys._getframe(len(inspect.stack())-1).f_globals
