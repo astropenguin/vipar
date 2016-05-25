@@ -1,1 +1,7 @@
+/vipar.py
 *.pyc
+
+# not ignore *.xml and task_*.py in task directory
+/tasks/*
+!/tasks/task_*.py
+!/tasks/*.xml
