@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" ?>
+<casaxml xmlns="http://casa.nrao.edu/schema/psetTypes.html"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
+file:///opt/casa/code/xmlcasa/xml/casa.xsd">
+
+<task type="function" name="mbopen" category="vipar">
+
+    <shortdescription>open a MBFITS</shortdescription>
+
+    <description>
+    open a MBFITS
+    </description>
+
+    <input>
+
+        <param type="string" name="mbfits" mustexist="true">
+            <description>name of input MBFITS</description>
+            <value></value>
+        </param>
+
+        <param type="string" name="mode">
+            <description>open mode</description>
+            <value>readonly</value>
+        </param>
+
+        <param type="bool" name="memmap">
+            <description>is memory mapping to be used?</description>
+            <value type="bool">False</value>
+        </param>
+
+    </input>
+
+    <example>
+        mbopen('sample.fits')
+    </example>
+
+</task>
+
+</casaxml>
