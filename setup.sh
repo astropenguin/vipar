@@ -13,7 +13,9 @@ fi
 # Step 1: build vipar tasks
 here=`pwd`
 cd ${here}/tasks
+echo "building vipar tasks. this may take a while ..."
 buildmytasks -o=../vipar.py
 
 # Step 2: loading tasks on CASA startup
 echo "execfile('${here}/vipar.py')" >> ~/.casa/init.py
+echo "done!"
