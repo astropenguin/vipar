@@ -5,7 +5,10 @@ import sys
 import inspect
 from taskinit import casalog
 import numpy as np
-from astropy.io import fits
+try:
+    import pyfits as fits
+except ImportError:
+    from astropy.io import fits
 
 def mbopen(mbfits=None, mode=None, memmap=None):
     casalog.origin('mbopen')
