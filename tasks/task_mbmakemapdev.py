@@ -17,7 +17,7 @@ except:
 # import viparc libraries
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.append('{}/../'.format(cwd))
-from viparc.map import grid, besselgauss, sincgauss, gauss
+from viparc.map import grid
 
 def mbmakemapdev(pixel=None, gridsize=None, show=None):
     casalog.origin('mbmakemapdev')
