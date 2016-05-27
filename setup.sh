@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# setup.sh - build vipar tasks
+# setup.sh - build Vipar tasks
 # author: Akio Taniguchi (IoA, UT)
 
 # Step 0: is CASA installed?
@@ -10,10 +10,10 @@ if ! [ `which casapy` ]; then
     exit
 fi
 
-# Step 1: build vipar tasks
+# Step 1: build Vipar tasks
 here=`pwd`
 cd ${here}/tasks
-echo "building vipar tasks. this may take a while ..."
+echo "building Vipar tasks. this may take a while ..."
 buildmytasks -o=../vipar.py
 
 # Step 2: loading tasks on CASA startup
