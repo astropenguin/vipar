@@ -15,7 +15,7 @@ def mbopen(mbfits=None, mode=None, memmap=None):
     casaglobals = sys._getframe(len(inspect.stack())-1).f_globals
 
     f = fits.open(mbfits, mode, memmap)
-    sc_cur = np.array(f['arraydata-mbfits'].data.DATA[:,:,0])
+    sc_cur = np.squeeze(f['arraydata-mbfits'].data.DATA)
 
     casaglobals['__vipar_mbfits__'] = f
     casaglobals['__vipar_currentscan__'] = sc_cur
