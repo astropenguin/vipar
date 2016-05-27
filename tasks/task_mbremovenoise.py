@@ -6,6 +6,7 @@ import inspect
 from taskinit import casalog
 import numpy as np
 
+# import viparc libraries
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.append('{}/../'.format(cwd))
 from viparc.statistics import PCA

@@ -7,7 +7,7 @@ from itertools import product
 from taskinit import casalog
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+
 try:
     import seaborn as sns
     sns.set_context('talk')
