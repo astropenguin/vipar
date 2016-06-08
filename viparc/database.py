@@ -1,69 +1,84 @@
 # coding: utf-8
 
-def append(db, newdata, N_max=10):
-    '''append a new data to a database.
+from copy import deepcopy
+from datetime import datetime
 
-    Parameters
-    ----------
-    + db (dict): a vipar's database.
-    + newdata (array): a new data to be appended to the database
-    + N_max: maximum number of data that can be stored in the database.
+class ViparDB(dict):
+    def __init__(self, N_max=10):
+        '''Vipar's database class.
 
-    Returns
-    ----------
-    + None (NoneType): this function returns nothing.
-    '''
-    indices = [i for i in db.keys() if type(i)==int]
-    N_data = len(indices)
+        Parameters
+        ----------
+        + N_max (int): maximum number of data that can be stored.
+                       default value: 10.
+        '''
+        dict.__init__(self)
+        self.N_max = N_max
 
-    if N_data == 0:
-        pass
+    def append(self, data):
+        '''append a new data to the database.
 
-    elif 0 < N_data < N_max:
-        for i in range(N_data)[::-1]:
-            db[i+1] = db.pop(i)
+        Parameters
+        ----------
+        + data (array): a new data to be appended to the database
 
-    else:
-        for i in range(N_data-1)[::-1]:
-            db[i+1] = db.pop(i)
+        Returns
+        ----------
+        this method returns nothing.
+        '''
+        indices = [i for i in self.keys() if type(i)==int]
+        N_data = len(indices)
 
-    db[0] = newdata
+        if N_data == 0:
+            pass
 
+        elif 0 < N_data < self.N_max:
+            for i in range(N_data)[::-1]:
+                self[i+1] = self.pop(i)
 
-def undo(db):
-    '''rewind a database to the previous state.
+        else:
+            for i in range(N_data-1)[::-1]:
+                self[i+1] = self.pop(i)
 
-    Parameters
-    ----------
-    + db (dict): a vipar's database.
+        self[0] = deepcopy(data)
 
-    Returns
-    ----------
-    + None (NoneType): this function returns nothing.
-    '''
-    indices = [i for i in db.keys() if type(i)==int]
-    N_data = len(indices)
+    def record(self, label=None):
+        '''record the current data as labeled one. this data will
+        not be deleted even if the number of data reaches N_max.
 
-    for i in range(N_data-1):
-        db[i] = db.pop(i+1)
+        Parameters
+        ----------
+        + label (str): a label of the new data. if not spacified, string
+                       of current datetime (YYYYmmddHHMMSS) will be set.
 
+        Returns
+        ----------
+        this function returns nothing.
+        '''
+        if (label is None) or (label == ''):
+            label = datetime.now().strftime('%Y%m%d%H%M%S')
 
-def record(db, newdata, label=None):
-    '''append a new labeled data to a database.
+        assert type(label) == str
+        self[label] = deepcopy(self[0])
 
-    Parameters
-    ----------
-    + db (dict): a vipar's database.
-    + newdata (array): a new data to be appended to the database
-    + label (str): a label of the new data. if not spacified,
-      string of current datetime (YYYYmmddHHMMSS) will be set.
+    def undo(self, label=None):
+        '''rewind the database to the previous or recorded state.
 
-    Returns
-    ----------
-    + None (NoneType): this function returns nothing.
-    '''
-    if label is None:
-        label = datetime.now().strftime('%Y%m%d%H%M%S')
+        Parameters
+        ----------
+        + label (str): a label of the recorded data to be returned.
+                       if not spacified, previous data will be set.
 
-    assert type(label) == str
-    db[label] = newdata
+        Returns
+        ----------
+        this function returns nothing.
+        '''
+        indices = [i for i in self.keys() if type(i)==int]
+        N_data = len(indices)
+
+        if (label is None) or (label == ''):
+            for i in range(N_data-1):
+                self[i] = self.pop(i+1)
+
+        else:
+            self.append(self[label])
