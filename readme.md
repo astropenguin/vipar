@@ -1,6 +1,6 @@
 # Vipar - Visualization and Imaging Package for ASTECAM Reduction
 
-+ version: 0.1.0 (alpha)
++ version: 0.1.2 (alpha)
 + author: Akio Taniguchi (IoA, UTokyo)
 
 ## Summary
