@@ -5,7 +5,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="mbmakemapdev" category="vipar">
+<task type="function" name="mbmakepixelmap" category="vipar">
 
     <shortdescription>make single pixel map</shortdescription>
 
@@ -27,6 +27,11 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
         <param type="bool" name="show">
             <description>show map after making it?</description>
+            <value type="bool">False</value>
+        </param>
+
+        <param type="bool" name="save">
+            <description>save map after making it?</description>
             <value type="bool">False</value>
         </param>
 
