@@ -5,7 +5,7 @@
 
 # Step 0: is CASA installed?
 if ! [ `which casapy` ]; then
-    echo "ERROR: CASA is not installed or symlinks are not created"
+    echo "ERROR: CASA is not installed and/or symlinks are not created"
     echo "Please install CASA and then !create-symlinks on CASA prompt"
     exit
 fi
