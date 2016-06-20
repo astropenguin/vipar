@@ -27,5 +27,5 @@ def mbinit():
     if not '__mbmaps__' in mbglobals.keys():
         mbglobals['__mbmaps__'] = ViparDB()
 
-    logger.post('Vipar - release 0.1.3 (alpha)')
+    logger.post('Vipar - release 0.2.0 (alpha)')
     logger.post('initial settings of Vipar finished')
