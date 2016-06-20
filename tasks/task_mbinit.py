@@ -13,11 +13,19 @@ except ImportError:
     from viparc.log import pythonlog as logger
 
 # unique preamble
+from viparc.data import ViparDB
 
 # definition of task
-def mbundoscan(label=''):
+def mbinit():
     taskname = sys._getframe().f_code.co_name
     mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
 
-    mbglobals['__mbscans__'].undo(label)
+    if not '__mbscans__' in mbglobals.keys():
+        mbglobals['__mbscans__'] = ViparDB()
+
+    if not '__mbmaps__' in mbglobals.keys():
+        mbglobals['__mbmaps__'] = ViparDB()
+
+    logger.post('Vipar - release 0.1.3 (alpha)')
+    logger.post('initial settings of Vipar finished')

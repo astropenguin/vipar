@@ -5,26 +5,25 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="mbrecordmap" category="vipar">
+<task type="function" name="mbsavemap" category="vipar">
 
-    <shortdescription>record current map</shortdescription>
+    <shortdescription>save map to a FITS</shortdescription>
 
-    <description>
-    record current map
-    </description>
+    <description>not fully descripted yet, sorry!</description>
 
     <input>
 
+        <param type="string" name="fitsname" mustexist="true">
+            <description>name of output FITS</description>
+            <value></value>
+        </param>
+
         <param type="string" name="label">
-            <description>label of recorded map</description>
+            <description>label of pinned map if necessary</description>
             <value></value>
         </param>
 
     </input>
-
-    <example>
-        write an example here
-    </example>
 
 </task>
 

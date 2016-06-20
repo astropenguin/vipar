@@ -7,9 +7,9 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
 <task type="function" name="mbsubtractbaseline" category="vipar">
 
-    <shortdescription>baseline fit</shortdescription>
+    <shortdescription>fit and subtract baseline from scan</shortdescription>
 
-    <description>baseline fit</description>
+    <description>not fully descripted yet, sorry!</description>
 
     <input>
 
@@ -18,11 +18,12 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
             <value>median</value>
         </param>
 
-    </input>
+        <param type="string" name="label">
+            <description>label of pinned scan if necessary</description>
+            <value></value>
+        </param>
 
-    <example>
-        write an example here
-    </example>
+    </input>
 
 </task>
 

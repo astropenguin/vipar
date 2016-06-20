@@ -5,19 +5,13 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="mbclose" category="vipar">
+<task type="function" name="mbinit" category="vipar">
 
-    <shortdescription>close an existing MBFITS</shortdescription>
+    <shortdescription>initial settings of Vipar</shortdescription>
 
-    <description>
-    close an existing MBFITS
-    </description>
+    <description>not fully descripted yet, sorry!</description>
 
     <input></input>
-
-    <example>
-        mbclose()
-    </example>
 
 </task>
 

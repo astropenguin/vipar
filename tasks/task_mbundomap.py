@@ -1,12 +1,23 @@
 # coding: utf-8
 
+# common preamble
 import os
 import sys
 import inspect
-from taskinit import casalog
+import numpy as np
+root = os.path.dirname(__file__)
+sys.path.append('{}/../'.format(root))
+try:
+    from taskinit import casalog as logger
+except ImportError:
+    from viparc.log import pythonlog as logger
 
-def mbundomap(label=None):
-    casalog.origin('mbundomap')
-    casaglobals = sys._getframe(len(inspect.stack())-1).f_globals
+# unique preamble
 
-    casaglobals['__vipar_maps__'].undo(label)
+# definition of task
+def mbundomap(label=''):
+    taskname = sys._getframe().f_code.co_name
+    mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
+    logger.origin(taskname)
+
+    mbglobals['__mbmaps__'].undo(label)

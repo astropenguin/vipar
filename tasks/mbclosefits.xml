@@ -5,20 +5,13 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="mbundomap" category="vipar">
+<task type="function" name="mbclosefits" category="vipar">
 
-    <shortdescription>undo current map to previous or pinned one</shortdescription>
+    <shortdescription>close an existing MBFITS</shortdescription>
 
     <description>not fully descripted yet, sorry!</description>
 
-    <input>
-
-        <param type="string" name="label">
-            <description>label of pinned map if necessary</description>
-            <value></value>
-        </param>
-
-    </input>
+    <input></input>
 
 </task>
 

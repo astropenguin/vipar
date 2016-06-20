@@ -7,20 +7,25 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
 <task type="function" name="mbremovenoise" category="vipar">
 
-    <shortdescription>noise removal</shortdescription>
+    <shortdescription>remove correlated noise from scan</shortdescription>
 
-    <description>noise removal</description>
+    <description>not fully descripted yet, sorry!</description>
 
     <input>
 
         <param type="string" name="method">
             <description>method of noise removal</description>
-            <value>pca</value>
+            <value>PCA</value>
         </param>
 
         <param type="intArray" name="pixellist">
             <description>list of pixel numbers</description>
-            <value type="intArray"></value>
+            <value></value>
+        </param>
+
+        <param type="string" name="label">
+            <description>label of pinned scan if necessary</description>
+            <value></value>
         </param>
 
         <param type="double" name="fraction" subparam="true">
@@ -31,18 +36,14 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
         <constraints>
 
             <when param="method">
-                <equals type="string" value="pca">
-                    <default param="fraction"><value type="double">0.9</value></default>
+                <equals type="string" value="PCA">
+                    <default param="fraction"><value>0.9</value></default>
                 </equals>
             </when>
 
         </constraints>
 
     </input>
-
-    <example>
-        write an example here
-    </example>
 
 </task>
 

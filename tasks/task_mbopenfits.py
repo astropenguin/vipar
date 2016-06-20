@@ -13,27 +13,33 @@ except ImportError:
     from viparc.log import pythonlog as logger
 
 # unique preamble
+import pyfits as fits
+from viparc.data import MBScan
 
 # definition of task
-def mbsubtractbaseline(method='median', label=''):
+def mbopenfits(mbfits, mode='readonly', memmap=False):
     taskname = sys._getframe().f_code.co_name
     mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
 
-    mbsc = mbglobals['__mbscans__'][label]
-    sc_old = mbsc['data'].data
+    fitsname = os.path.basename(mbfits)
+    logger.post('MBFITS: {}'.format(fitsname))
 
-    logger.post('method: {}'.format(method))
     try:
-        fr_baseline = getattr(np, method)(sc_old, axis=0)
-        sc_new = sc_old - fr_baseline
-        logger.post('baseline is successfully estimated')
+        f = fits.open(mbfits, mode, memmap)
+        logger.post('MBFITS is successfully opened')
     except:
         logger.post('an error occured', 'ERROR')
 
-    mbsc['data'].data = sc_new
+    mbsc = MBScan.fromfits(f)
     mbsc.recordtask(taskname)
+
+    if '__mbfits__' in mbglobals.keys():
+        mbglobals['__mbfits__'].close()
+        del mbglobals['__mbfits__']
+
+    mbglobals['__mbfits__'] = f
     mbglobals['__mbscans__'].append(mbsc)
 
-    logger.post('baseline is successfully subtracted from MBScan')
-    logger.post('new MBScan is now stored as __mbscans__[0]')
+    logger.post('MBFITS is now stored as __mbfits__')
+    logger.post('MBScan is now stored as __mbscans__[0]')

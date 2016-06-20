@@ -15,9 +15,9 @@ except ImportError:
 # unique preamble
 
 # definition of task
-def mbundoscan(label=''):
+def mbpinmap(label=''):
     taskname = sys._getframe().f_code.co_name
     mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
 
-    mbglobals['__mbscans__'].undo(label)
+    mbglobals['__mbmaps__'].pin(label)

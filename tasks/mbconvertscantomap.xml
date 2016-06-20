@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" ?>
+<casaxml xmlns="http://casa.nrao.edu/schema/psetTypes.html"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
+file:///opt/casa/code/xmlcasa/xml/casa.xsd">
+
+<task type="function" name="mbconvertscantomap" category="vipar">
+
+    <shortdescription>convert scan to map</shortdescription>
+
+    <description>not fully descripted yet, sorry!</description>
+
+    <input>
+
+        <param type="string" name="method">
+            <description>convert method</description>
+            <value>singlepixel</value>
+        </param>
+
+        <param type="doubleArray" name="gridsize">
+            <description>grid sizes of dAz and dEl</description>
+            <value>6.0, 6.0</value>
+        </param>
+
+        <param type="doubleArray" name="gridrefval">
+            <description>grid reference values of dAz and dEl</description>
+            <value>0.0, 0.0</value>
+        </param>
+
+        <param type="string" name="label">
+            <description>label of pinned scan if necessary</description>
+            <value></value>
+        </param>
+
+        <param type="int" name="pixel" subparam="true">
+            <description>pixel No.</description>
+            <value>1</value>
+        </param>
+
+        <constraints>
+
+            <when param="method">
+                <equals type="string" value="singlepixel">
+                    <default param="pixel"><value>1</value></default>
+                </equals>
+            </when>
+
+        </constraints>
+
+    </input>
+
+</task>
+
+</casaxml>

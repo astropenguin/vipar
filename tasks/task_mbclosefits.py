@@ -15,9 +15,11 @@ except ImportError:
 # unique preamble
 
 # definition of task
-def mbundoscan(label=''):
+def mbclosefits():
     taskname = sys._getframe().f_code.co_name
     mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
 
-    mbglobals['__mbscans__'].undo(label)
+    if '__mbfits__' in mbglobals.keys():
+        mbglobals['__mbfits__'].close()
+        del mbglobals['__mbfits__']

@@ -5,26 +5,20 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="mbrecordscan" category="vipar">
+<task type="function" name="mbpinmap" category="vipar">
 
-    <shortdescription>record current scan</shortdescription>
+    <shortdescription>pin a map for later use</shortdescription>
 
-    <description>
-    record current scan
-    </description>
+    <description>not fully descripted yet, sorry!</description>
 
     <input>
 
         <param type="string" name="label">
-            <description>label of recorded scan</description>
+            <description>label of pinned map if necessary</description>
             <value></value>
         </param>
 
     </input>
-
-    <example>
-        write an example here
-    </example>
 
 </task>
 

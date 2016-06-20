@@ -5,13 +5,11 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="mbopen" category="vipar">
+<task type="function" name="mbopenfits" category="vipar">
 
     <shortdescription>open a MBFITS</shortdescription>
 
-    <description>
-    open a MBFITS
-    </description>
+    <description>not fully descripted yet, sorry!</description>
 
     <input>
 
@@ -27,14 +25,10 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
         <param type="bool" name="memmap">
             <description>is memory mapping to be used?</description>
-            <value type="bool">False</value>
+            <value>False</value>
         </param>
 
     </input>
-
-    <example>
-        mbopen('sample.fits')
-    </example>
 
 </task>
 

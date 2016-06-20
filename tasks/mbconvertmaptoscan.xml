@@ -5,9 +5,9 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
-<task type="function" name="mbundomap" category="vipar">
+<task type="function" name="mbconvertmaptoscan" category="vipar">
 
-    <shortdescription>undo current map to previous or pinned one</shortdescription>
+    <shortdescription>convert map to scan</shortdescription>
 
     <description>not fully descripted yet, sorry!</description>
 

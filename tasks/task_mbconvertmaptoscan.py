@@ -13,11 +13,12 @@ except ImportError:
     from viparc.log import pythonlog as logger
 
 # unique preamble
+import pyfits as fits
+from viparc.map import SinglePixel
 
 # definition of task
-def mbundoscan(label=''):
+def mbconvertmaptoscan(label=''):
     taskname = sys._getframe().f_code.co_name
     mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
-
-    mbglobals['__mbscans__'].undo(label)
+    logger.post('not implemented yet!')
