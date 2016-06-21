@@ -7,7 +7,13 @@ log.py - Vipar's logging module
 + contact: taniguchi@ioa.s.u-tokyo.ac.jp
 '''
 
+# common preamble
 import os
+import sys
+import inspect
+import numpy as np
+
+# unique preamble
 import logging
 from datetime import datetime
 
@@ -15,8 +21,9 @@ config = {}
 config['level'] = logging.INFO
 config['format'] = '%(asctime)s  %(levelname)-6s  %(name)-18s  %(message)s'
 config['datefmt'] = '%Y-%m-%d %H:%M:%S'
-config['filename'] = 'vipar-{:%Y%m%d-%H%M%S}.log'.format(datetime.now())
+config['filename'] = 'vipar-{0:%Y%m%d-%H%M%S}.log'.format(datetime.now())
 logging.basicConfig(**config)
+
 
 # naming style of this class is exceptionally non-CamelCase
 # because the corresponding logging class in CASA is "casalog"

@@ -32,8 +32,7 @@ echo "sys.path.append('${root}/tasks')" >> vipardev.py
 echo "scripts = glob.glob('${root}/tasks/task_*.py')" >> vipardev.py
 echo "modules = [os.path.basename(s)[:-3] for s in scripts]" >> vipardev.py
 echo "for module in modules:" >> vipardev.py
-echo "    exec('from {} import {}'.format(module, module[5:]))" >> vipardev.py
-echo "mbglobals = sys._getframe(len(inspect.stack())-1).f_globals" >> vipardev.py
+echo "    exec('from {0} import {1}'.format(module, module[5:]))" >> vipardev.py
 echo "mbinit()" >> vipardev.py
 echo "done!"
 

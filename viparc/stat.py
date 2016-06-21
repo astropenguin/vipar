@@ -184,15 +184,15 @@ class Gaussian2D(object):
         args_f = []
         for arg in args:
             if arg in kwargs.keys():
-                args_f.append('{}={}'.format(arg, kwargs[arg]))
+                args_f.append('{0}={1}'.format(arg, kwargs[arg]))
             else:
-                args_f.append('{}={}'.format(arg, arg))
+                args_f.append('{0}={1}'.format(arg, arg))
 
         args_fnew = ','.join(args_fnew)
         args_f = ','.join(args_f)
 
-        func = 'lambda (x,y),{}: self.func((x,y),{})'
-        func = eval(func.format(args_fnew, args_f), locals())
+        func_str = 'lambda (x,y),{0}: self.func((x,y),{1})'
+        func = eval(func_str.format(args_fnew, args_f), locals())
 
         return func
 

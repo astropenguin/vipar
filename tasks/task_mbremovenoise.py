@@ -6,10 +6,11 @@ import sys
 import inspect
 import numpy as np
 root = os.path.dirname(__file__)
-sys.path.append('{}/../'.format(root))
-try:
+sys.path.append('{0}/../'.format(root))
+incasa = '__CASAPY_PYTHONDIR' in os.environ
+if incasa:
     from taskinit import casalog as logger
-except ImportError:
+else:
     from viparc.log import pythonlog as logger
 
 # unique preamble
@@ -17,8 +18,9 @@ from viparc.stat import PCA
 
 # definition of task
 def mbremovenoise(method='PCA', pixellist=[], label='', fraction=0.9):
+    depth = len(inspect.stack())-1 if incasa else 1
+    mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
-    mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
 
     mbsc = mbglobals['__mbscans__'][label]
@@ -28,10 +30,10 @@ def mbremovenoise(method='PCA', pixellist=[], label='', fraction=0.9):
         logger.post('pixels used for estimation: all')
         sc_target = sc_old
     else:
-        logger.post('pixels used for estimation: {}'.format(pixellist))
+        logger.post('pixels used for estimation: {0}'.format(pixellist))
         sc_target = sc_old[:,np.array(pixellist)-1]
 
-    logger.post('method: {}'.format(method))
+    logger.post('method: {0}'.format(method))
     try:
         if method == 'PCA':
             fr_gain = np.ptp(sc_target, axis=0) # effective gain

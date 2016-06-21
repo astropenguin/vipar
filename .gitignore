@@ -1,6 +1,8 @@
 /vipar.py
 /vipardev.py
+/remove.sh
 *.pyc
+*.DS_Store
 
 # not ignore *.xml and task_*.py in task directory
 /tasks/*

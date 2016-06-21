@@ -156,7 +156,7 @@ class MBScan(fits.HDUList):
         if not 'TASKFLOW' in self['primary'].header.keys():
             self['data'].header['TASKFLOW'] = taskname
         else:
-            self['data'].header['TASKFLOW'] += ' --> {}'.format(taskname)
+            self['data'].header['TASKFLOW'] += ' --> {0}'.format(taskname)
 
 
 class MBMap(fits.HDUList):
@@ -197,4 +197,4 @@ class MBMap(fits.HDUList):
         if not 'TASKFLOW' in self['primary'].header.keys():
             self['data'].header['TASKFLOW'] = taskname
         else:
-            self['data'].header['TASKFLOW'] += ' --> {}'.format(taskname)
+            self['data'].header['TASKFLOW'] += ' --> {0}'.format(taskname)

@@ -6,10 +6,11 @@ import sys
 import inspect
 import numpy as np
 root = os.path.dirname(__file__)
-sys.path.append('{}/../'.format(root))
-try:
+sys.path.append('{0}/../'.format(root))
+incasa = '__CASAPY_PYTHONDIR' in os.environ
+if incasa:
     from taskinit import casalog as logger
-except ImportError:
+else:
     from viparc.log import pythonlog as logger
 
 # unique preamble
@@ -18,12 +19,13 @@ from viparc.data import MBScan
 
 # definition of task
 def mbopenfits(mbfits, mode='readonly', memmap=False):
+    depth = len(inspect.stack())-1 if incasa else 1
+    mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
-    mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
 
     fitsname = os.path.basename(mbfits)
-    logger.post('MBFITS: {}'.format(fitsname))
+    logger.post('MBFITS: {0}'.format(fitsname))
 
     try:
         f = fits.open(mbfits, mode, memmap)

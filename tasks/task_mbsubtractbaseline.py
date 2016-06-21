@@ -6,24 +6,26 @@ import sys
 import inspect
 import numpy as np
 root = os.path.dirname(__file__)
-sys.path.append('{}/../'.format(root))
-try:
+sys.path.append('{0}/../'.format(root))
+incasa = '__CASAPY_PYTHONDIR' in os.environ
+if incasa:
     from taskinit import casalog as logger
-except ImportError:
+else:
     from viparc.log import pythonlog as logger
 
 # unique preamble
 
 # definition of task
 def mbsubtractbaseline(method='median', label=''):
+    depth = len(inspect.stack())-1 if incasa else 1
+    mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
-    mbglobals = sys._getframe(len(inspect.stack())-1).f_globals
     logger.origin(taskname)
 
     mbsc = mbglobals['__mbscans__'][label]
     sc_old = mbsc['data'].data
 
-    logger.post('method: {}'.format(method))
+    logger.post('method: {0}'.format(method))
     try:
         fr_baseline = getattr(np, method)(sc_old, axis=0)
         sc_new = sc_old - fr_baseline

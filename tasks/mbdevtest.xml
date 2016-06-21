@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" ?>
+<casaxml xmlns="http://casa.nrao.edu/schema/psetTypes.html"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
+file:///opt/casa/code/xmlcasa/xml/casa.xsd">
+
+<task type="function" name="mbdevtest" category="vipar">
+
+    <shortdescription>test task for development</shortdescription>
+
+    <description>test task for development</description>
+
+    <input>
+
+        <param type="string" name="objname">
+            <description>name of object</description>
+            <value></value>
+        </param>
+
+    </input>
+
+</task>
+
+</casaxml>
