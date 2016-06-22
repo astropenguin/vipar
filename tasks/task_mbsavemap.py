@@ -16,10 +16,11 @@ else:
 # unique preamble
 
 # definition of task
-def mbsavemap(fitsname, label=''):
-    depth = len(inspect.stack())-1 if incasa else 1
+def mbsavemap(fitsname, overwrite=False, label=''):
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)
 
-    logger.post('not implemented yet!')
+    mbmp = mbglobals['__mbmaps__'][label]
+    mbmp.writeto(fitsname, clobber=overwrite)

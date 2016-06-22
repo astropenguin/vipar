@@ -18,15 +18,15 @@ import matplotlib.pyplot as plt
 
 # definition of task
 def mbplotscan(pixellist=[1,2], label=''):
-    depth = len(inspect.stack())-1 if incasa else 1
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)
 
     mbsc = mbglobals['__mbscans__'][label]
     mjd = mbsc['record'].data['MJD']
-    ax = plt.gca()
 
+    ax = plt.gca()
     for pixel in pixellist:
         ts = mbsc['data'].data[:,pixel-1]
         ax.plot(mjd, ts, label='Pixel No. {0}'.format(pixel))

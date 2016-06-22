@@ -14,13 +14,12 @@ else:
     from viparc.log import pythonlog as logger
 
 # unique preamble
-import matplotlib.pyplot as plt
 
 # definition of task
-def mbplotmap(raster='data', contour='fit', label=''):
+def mbmathmap(objname='aaa'):
     depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)
 
-    logger.post('not implemented yet!')
+    mbglobals[objname] = 'spam!'

@@ -16,10 +16,11 @@ else:
 # unique preamble
 
 # definition of task
-def mbsavescan(fitsname, label=''):
-    depth = len(inspect.stack())-1 if incasa else 1
+def mbsavescan(fitsname, overwrite=False, label=''):
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)
 
-    logger.post('not implemented yet!')
+    mbsc = mbglobals['__mbscans__'][label]
+    mbsc.writeto(fitsname, clobber=overwrite)

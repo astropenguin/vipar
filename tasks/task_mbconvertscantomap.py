@@ -19,7 +19,7 @@ from viparc.map import SinglePixel
 
 # definition of task
 def mbconvertscantomap(method='singlepixel', gridsize=[6,6], gridrefval=[0,0], label='', pixel=None):
-    depth = len(inspect.stack())-1 if incasa else 1
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)

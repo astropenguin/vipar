@@ -19,7 +19,7 @@ from viparc.data import MBScan
 
 # definition of task
 def mbopenfits(mbfits, mode='readonly', memmap=False):
-    depth = len(inspect.stack())-1 if incasa else 1
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)

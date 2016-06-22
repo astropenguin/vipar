@@ -18,7 +18,7 @@ from viparc.stat import PCA
 
 # definition of task
 def mbremovenoise(method='PCA', pixellist=[], label='', fraction=0.9):
-    depth = len(inspect.stack())-1 if incasa else 1
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)

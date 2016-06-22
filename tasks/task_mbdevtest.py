@@ -6,7 +6,7 @@ import sys
 import inspect
 import numpy as np
 root = os.path.dirname(__file__)
-sys.path.append('{}/../'.format(root))
+sys.path.append('{0}/../'.format(root))
 incasa = '__CASAPY_PYTHONDIR' in os.environ
 if incasa:
     from taskinit import casalog as logger
@@ -17,7 +17,7 @@ else:
 
 # definition of task
 def mbdevtest(objname='aaa'):
-    depth = len(inspect.stack())-1 if incasa else 1
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)

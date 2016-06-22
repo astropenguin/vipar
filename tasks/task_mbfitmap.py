@@ -19,7 +19,7 @@ from viparc.stat import Gaussian2D
 
 # definition of task
 def mbfitmap(method='Gaussian2D', label=''):
-    depth = len(inspect.stack())-1 if incasa else 1
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)

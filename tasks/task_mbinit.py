@@ -15,10 +15,11 @@ else:
 
 # unique preamble
 from viparc.data import ViparDB
+from viparc.tools import default, go, inp
 
 # definition of task
 def mbinit():
-    depth = len(inspect.stack())-1 if incasa else 1
+    depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)
@@ -29,5 +30,10 @@ def mbinit():
     if not '__mbmaps__' in mbglobals.keys():
         mbglobals['__mbmaps__'] = ViparDB()
 
-    logger.post('Vipar - release 0.2.1 (alpha)')
+    if not incasa:
+        mbglobals['default'] = default
+        mbglobals['go'] = go
+        mbglobals['inp'] = inp
+
+    logger.post('Vipar - release 0.2.2 (alpha)')
     logger.post('initial settings of Vipar finished')
