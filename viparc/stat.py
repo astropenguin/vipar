@@ -47,10 +47,10 @@ class Gaussian2D(object):
         '''Fit 2D Gaussian to a map.
 
         Args:
-        - mg_daz (2D array): meshgrid of dAz [degree]
-        - mg_del (2D array): meshgrid of dEl [degree]
+        - mg_daz (2D array): meshgrid of dAz [arcsec]
+        - mg_del (2D array): meshgrid of dEl [arcsec]
         - mp_data (2D array): data map [arbitrary unit]
-        - b_0 (float): typical beam size for initial guess [degree]
+        - b_0 (float): typical beam size for initial guess [arcsec]
 
         Returns:
         - mp_fit (2D array): fit map [arbitrary unit]
