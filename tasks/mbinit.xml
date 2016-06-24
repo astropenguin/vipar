@@ -11,7 +11,19 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
     <description>not fully descripted yet, sorry!</description>
 
-    <input></input>
+    <input>
+
+        <param type="string" name="version" mustexist="true">
+            <description>version No. of Vipar</description>
+            <value></value>
+        </param>
+
+        <param type="string" name="status" mustexist="true">
+            <description>development status of Vipar</description>
+            <value></value>
+        </param>
+
+    </input>
 
 </task>
 
