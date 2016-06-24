@@ -43,7 +43,7 @@ class PCA:
 
 
 class Gaussian2D(object):
-    def fit(self, mg_daz, mg_del, mp_data, b_0=23.0):
+    def fit(self, mg_daz, mg_del, mp_data, b_0=23.0, sn_threshold=3.0):
         '''Fit 2D Gaussian to a map.
 
         Args:
@@ -51,6 +51,7 @@ class Gaussian2D(object):
         - mg_del (2D array): meshgrid of dEl [arcsec]
         - mp_data (2D array): data map [arbitrary unit]
         - b_0 (float): typical beam size for initial guess [arcsec]
+        - sn_threshold (float): threshold of S/N
 
         Returns:
         - mp_fit (2D array): fit map [arbitrary unit]
@@ -113,23 +114,28 @@ class Gaussian2D(object):
         # step 6: make header
         hd_fit = fits.Header()
         hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
-        hd_fit['FIT_CHI2'] = chi2, 'reduced Chi^2 (no unit)'
-        hd_fit['FIT_SD']   = sd, 'S.D. of map (no unit)'
-        hd_fit['FIT_SN']   = sn, 'S/N of amplitude (no unit)'
-        hd_fit['PAR_DAZ']  = xp, 'offset in dAz (arcsec)'
-        hd_fit['PAR_DEL']  = yp, 'offset in dEl (arcsec)'
-        hd_fit['PAR_BMAJ'] = bmaj, 'major beamsize (arcsec)'
-        hd_fit['PAR_BMIN'] = bmin, 'minor beamsize (arcsec)'
-        hd_fit['PAR_PA']   = pa, 'position angle (degree)'
-        hd_fit['PAR_AMPL'] = ampl, 'amplitude (no unit)'
-        hd_fit['PAR_OFFS'] = offset, 'offset (no unit)'
-        hd_fit['ERR_DAZ']  = xp_e, 'offset in dAz (arcsec)'
-        hd_fit['ERR_DEL']  = yp_e, 'offset in dEl (arcsec)'
-        hd_fit['ERR_BMAJ'] = bmaj_e, 'major beamsize (arcsec)'
-        hd_fit['ERR_BMIN'] = bmin_e, 'minor beamsize (arcsec)'
-        hd_fit['ERR_PA']   = pa_e, 'position angle (degree)'
-        hd_fit['ERR_AMPL'] = ampl_e, 'amplitude (no unit)'
-        hd_fit['ERR_OFFS'] = offset_e, 'offset (no unit)'
+
+        if sn >= sn_threshold:
+            hd_fit['FIT_STAT'] = 'success', 'fiting status'
+            hd_fit['FIT_CHI2'] = chi2, 'reduced Chi^2 (no unit)'
+            hd_fit['FIT_SD']   = sd, 'S.D. of map (no unit)'
+            hd_fit['FIT_SN']   = sn, 'S/N of amplitude (no unit)'
+            hd_fit['PAR_DAZ']  = xp, 'offset in dAz (arcsec)'
+            hd_fit['PAR_DEL']  = yp, 'offset in dEl (arcsec)'
+            hd_fit['PAR_BMAJ'] = bmaj, 'major beamsize (arcsec)'
+            hd_fit['PAR_BMIN'] = bmin, 'minor beamsize (arcsec)'
+            hd_fit['PAR_PA']   = pa, 'position angle (degree)'
+            hd_fit['PAR_AMPL'] = ampl, 'amplitude (no unit)'
+            hd_fit['PAR_OFFS'] = offset, 'offset (no unit)'
+            hd_fit['ERR_DAZ']  = xp_e, 'offset in dAz (arcsec)'
+            hd_fit['ERR_DEL']  = yp_e, 'offset in dEl (arcsec)'
+            hd_fit['ERR_BMAJ'] = bmaj_e, 'major beamsize (arcsec)'
+            hd_fit['ERR_BMIN'] = bmin_e, 'minor beamsize (arcsec)'
+            hd_fit['ERR_PA']   = pa_e, 'position angle (degree)'
+            hd_fit['ERR_AMPL'] = ampl_e, 'amplitude (no unit)'
+            hd_fit['ERR_OFFS'] = offset_e, 'offset (no unit)'
+        else:
+            hd_fit['FIT_STAT'] = 'failed', 'fiting status'
 
         return hd_fit, mp_fit
 
