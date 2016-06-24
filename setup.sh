@@ -3,6 +3,8 @@
 # setup.sh - build Vipar tasks
 # author: Akio Taniguchi (IoA, UT)
 
+version="0.2.3"
+status="alpha"
 root=`pwd`
 
 # Step 0: is CASA installed?
@@ -20,7 +22,7 @@ echo "(this may take a while)"
 cd ${root}/tasks
 buildmytasks -o=../vipar.py
 cd ${root}
-echo "mbinit()" >> vipar.py
+echo "mbinit('${version}','${status}')" >> vipar.py
 echo "done!"
 
 # Step 2: create vipardev.py for development use
@@ -33,7 +35,7 @@ echo "scripts = glob.glob('${root}/tasks/task_*.py')" >> vipardev.py
 echo "modules = [os.path.basename(s)[:-3] for s in scripts]" >> vipardev.py
 echo "for module in modules:" >> vipardev.py
 echo "    exec('from {0} import {1}'.format(module, module[5:]))" >> vipardev.py
-echo "mbinit()" >> vipardev.py
+echo "mbinit('${version}','${status}')" >> vipardev.py
 echo "done!"
 
 # Step 3: print instruction and finish setup

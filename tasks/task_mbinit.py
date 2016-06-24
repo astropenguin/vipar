@@ -18,7 +18,7 @@ from viparc.data import ViparDB
 from viparc.tools import default, go, inp
 
 # definition of task
-def mbinit():
+def mbinit(version, status):
     depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
@@ -35,5 +35,5 @@ def mbinit():
         mbglobals['go'] = go
         mbglobals['inp'] = inp
 
-    logger.post('Vipar - release 0.2.2 (alpha)')
+    logger.post('Vipar - version {} ({})'.format(version, status))
     logger.post('initial settings of Vipar finished')
