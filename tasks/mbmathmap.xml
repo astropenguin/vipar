@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" ?>
+<casaxml xmlns="http://casa.nrao.edu/schema/psetTypes.html"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
+file:///opt/casa/code/xmlcasa/xml/casa.xsd">
+
+<task type="function" name="mbplotmap" category="vipar">
+
+    <shortdescription>calculate map</shortdescription>
+
+    <description>not fully descripted yet, sorry!</description>
+
+    <input>
+
+        <param type="string" name="expression">
+            <description>expression of calculation</description>
+            <value>MP0+MP1</value>
+        </param>
+
+        <param type="string" name="label0">
+            <description>label of pinned map if necessary</description>
+            <value></value>
+        </param>
+
+        <param type="string" name="label1">
+            <description>label of pinned map if necessary</description>
+            <value></value>
+        </param>
+
+    </input>
+
+</task>
+
+</casaxml>
