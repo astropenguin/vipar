@@ -42,8 +42,24 @@ class PCA:
         return scan
 
 
+class CheckConvergence(object):
+    def __init__(self, threshold=0.01):
+        self.threshold = threshold
+        self.p_prev = 0.0
+
+    def __call__(self, *p_now):
+        p_now = np.array(p_now)
+        d_now = np.linalg.norm(p_now)
+        d_diff = np.linalg.norm(p_now - self.p_prev)
+        ratio = d_diff / d_now
+        self.p_prev = p_now
+        print(ratio)
+
+        return ratio <= self.threshold
+
+
 class Gaussian2D(object):
-    def fit(self, mg_daz, mg_del, mp_data, b_0=23.0, sn_threshold=3.0):
+    def fit(self, mg_daz, mg_del, mp_data, b_0=23.0, threshold=3.0):
         '''Fit 2D Gaussian to a map.
 
         Args:
@@ -51,70 +67,103 @@ class Gaussian2D(object):
         - mg_del (2D array): meshgrid of dEl [arcsec]
         - mp_data (2D array): data map [arbitrary unit]
         - b_0 (float): typical beam size for initial guess [arcsec]
-        - sn_threshold (float): threshold of S/N
+        - threshold (float): threshold of S/N
 
         Returns:
         - mp_fit (2D array): fit map [arbitrary unit]
         - hd_fit (Header): FITS header object containing the results of fit
         '''
+        # preprocessing
         mp_data = deepcopy(mp_data)
         mp_data[np.isnan(mp_data)] = np.nanmedian(mp_data)
-        mp_flat = mp_data.flatten()
 
-        hd_fit = fits.Header()
-        hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
-
-        # step 1: bmaj, bmin, pa
+        # step 1: initial parameters (*_0)
         b_0 = float(b_0)
         bmaj_0, bmin_0, pa_0 = b_0, b_0, 0.0
 
-        # step 2: xp, yp
         grid_daz = np.mean(np.diff(mg_daz))
         grid_del = np.mean(np.diff(mg_del))
         grid_typ = np.sqrt(grid_daz**2 + grid_del**2)
         sigma = b_0/(2*np.sqrt(np.log(2)))/grid_typ
 
         mp_gauss = gaussian_filter(mp_data, sigma)
-        positive = np.max(mp_gauss) > -np.min(mp_gauss)
-        argfunc = np.argmax if positive else np.argmin
+        peak_pos = np.max(mp_gauss) - np.median(mp_gauss)
+        peak_neg = np.median(mp_gauss) - np.min(mp_gauss)
+        argfunc = np.argmax if peak_pos > peak_neg else np.argmin
         j, i = np.unravel_index(argfunc(mp_gauss), mp_gauss.shape)
         xp_0, yp_0 = mg_daz[j,i], mg_del[j,i]
 
-        # step 3: ampl, offset
         f = self.partialfunc(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
-        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_flat)
-        mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
+        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten())
         ampl_0, offset_0 = popt
 
+        # step 2: if initial S/N<3, then stop fitting
         sd_0 = self._estimate_sd(mg_daz, mg_del, mp_data, xp_0, yp_0, bmaj_0, bmin_0)
         sn_0 = np.abs(ampl_0/sd_0)
+        if sn_0 < threshold:
+            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
+            hd_fit = fits.Header()
+            hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
+            hd_fit['FIT_STAT'] = 'failed', 'fiting status'
 
-        if sn_0 > sn_threshold:
-            # step 4: bmaj, bmin, pa
+            return hd_fit, mp_fit
+
+        # step 3: iterative fit
+        cc = CheckConvergence()
+        while not cc(xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0):
+            # bmaj, bmin, pa
             f = self.partialfunc(xp=xp_0, yp=yp_0, ampl=ampl_0, offset=offset_0)
-            p_0 = [bmaj_0, bmin_0, pa_0]
-            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_flat, p_0)
-            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
-
+            pinit = [bmaj_0, bmin_0, pa_0]
+            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
             bmaj_0, bmin_0, pa_0 = popt
-            bmaj_0, bmin_0, pa_0, inv= self._correct_rotation(bmaj_0, bmin_0, pa_0)
+            bmaj_e, bmin_e, pa_e = np.sqrt(np.diag(pcov))
+            if bmaj_0 < bmin_0:
+                bmaj_0, bmin_0 = bmin_0, bmaj_0
+                bmaj_e, bmin_e = bmin_e, bmaj_e
+                pa_0 += 90.0
 
-            # step 5: all parameters
-            f = self.partialfunc()
-            p_0 = [xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0]
-            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_flat, p_0)
-            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
+            pa_0 %= 180.0
 
-            xp, yp, bmaj, bmin, pa, ampl, offset = popt
-            xp_e, yp_e, bmaj_e, bmin_e, pa_e, ampl_e, offset_e = np.sqrt(np.diag(pcov))
-            bmaj, bmin, pa, inv = self._correct_rotation(bmaj, bmin, pa)
-            bmaj_e, bmin_e = (bmin_e, bmaj_e) if inv else (bmaj_e, bmin_e)
+            # xp, yp
+            f = self.partialfunc(bmaj=bmaj_0, bmin=bmin_0, pa=pa_0, ampl=ampl_0, offset=offset_0)
+            pinit = [xp_0, yp_0]
+            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
+            xp_0, yp_0 = popt
+            xp_e, yp_e = np.sqrt(np.diag(pcov))
 
-            sd = self._estimate_sd(mg_daz, mg_del, mp_data, xp, yp, bmaj, bmin)
-            sn = np.abs(ampl/sd)
-            chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
+            # ampl, offset
+            f = self.partialfunc(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
+            pinit = [ampl_0, offset_0]
+            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
+            ampl_0, offset_0 = popt
+            ampl_e, offset_e = np.sqrt(np.diag(pcov))
 
-            # step 6: make header
+        # step 4: fit all parameters
+        f = self.partialfunc()
+        pinit = np.array([xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0])
+        psigma = np.array([xp_e, yp_e, bmaj_e, bmin_e, pa_e, ampl_e, offset_e])
+        pbounds = (pinit-psigma, pinit+psigma)
+
+        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit, bounds=pbounds)
+        xp, yp, bmaj, bmin, pa, ampl, offset = popt
+        xp_e, yp_e, bmaj_e, bmin_e, pa_e, ampl_e, offset_e = np.sqrt(np.diag(pcov))
+        if bmaj < bmin:
+            bmaj, bmin = bmin, bmaj
+            bmaj_e, bmin_e = bmin_e, bmaj_e
+            pa += 90.0
+
+        pa %= 180.0
+
+        mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
+        sd = self._estimate_sd(mg_daz, mg_del, mp_data, xp, yp, bmaj, bmin)
+        sn = np.abs(ampl/sd)
+        chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
+
+        # step 5: make header
+        hd_fit = fits.Header()
+        hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
+
+        if sn > threshold:
             hd_fit['FIT_STAT'] = 'success', 'fiting status'
             hd_fit['FIT_CHI2'] = chi2, 'reduced Chi^2 (no unit)'
             hd_fit['FIT_SD']   = sd, 'S.D. of map (no unit)'
@@ -133,7 +182,6 @@ class Gaussian2D(object):
             hd_fit['ERR_PA']   = pa_e, 'position angle (degree)'
             hd_fit['ERR_AMPL'] = ampl_e, 'amplitude (no unit)'
             hd_fit['ERR_OFFS'] = offset_e, 'offset (no unit)'
-
         else:
             hd_fit['FIT_STAT'] = 'failed', 'fiting status'
 
@@ -224,27 +272,3 @@ class Gaussian2D(object):
         sd_est = np.std(mp_noise)
 
         return sd_est
-
-    @staticmethod
-    def _correct_rotation(bmaj, bmin, pa):
-        '''Correct bmaj, bmin, pa if bmaj is less than bmin.
-
-        Args:
-        - bmaj (float): Major beam size from popt [arbitrary unit]
-        - bmin (float): Minor beam size from popt [arbitrary unit]
-        - pa (float): Position angle from popt [degree]
-
-        Returns:
-        - bmaj (float): Corrected major beam size [arbitrary unit]
-        - bmin (float): Corrected minor beam size [arbitrary unit]
-        - pa (float): Corrected position angle [degree]
-        - inversion (bool): True (bmaj < bmin) or False (otherwise)
-        '''
-        inversion = bmaj < bmin
-        if inversion:
-            bmaj, bmin = bmin, bmaj
-            pa += 90.0
-
-        pa %= 180.0
-
-        return bmaj, bmin, pa, inversion
