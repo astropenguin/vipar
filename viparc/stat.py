@@ -57,10 +57,12 @@ class Gaussian2D(object):
         - mp_fit (2D array): fit map [arbitrary unit]
         - hd_fit (Header): FITS header object containing the results of fit
         '''
-        # step 0: preprocessing
         mp_data = deepcopy(mp_data)
         mp_data[np.isnan(mp_data)] = np.nanmedian(mp_data)
         mp_flat = mp_data.flatten()
+
+        hd_fit = fits.Header()
+        hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
 
         # step 1: bmaj, bmin, pa
         b_0 = float(b_0)
@@ -84,38 +86,35 @@ class Gaussian2D(object):
         mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
         ampl_0, offset_0 = popt
 
-        # step 4: bmaj, bmin, pa
-        f = self.partialfunc(xp=xp_0, yp=yp_0, ampl=ampl_0, offset=offset_0)
-        p_0 = [bmaj_0, bmin_0, pa_0]
-        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_flat, p_0)
-        mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
+        sd_0 = self._estimate_sd(mg_daz, mg_del, mp_data, xp_0, yp_0, bmaj_0, bmin_0)
+        sn_0 = np.abs(ampl_0/sd_0)
 
-        bmaj_0, bmin_0, pa_0 = popt
-        bmaj_0, bmin_0, pa_0, inv= self._correct_rotation(bmaj_0, bmin_0, pa_0)
+        if sn_0 > sn_threshold:
+            # step 4: bmaj, bmin, pa
+            f = self.partialfunc(xp=xp_0, yp=yp_0, ampl=ampl_0, offset=offset_0)
+            p_0 = [bmaj_0, bmin_0, pa_0]
+            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_flat, p_0)
+            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
 
-        # step 5: all parameters
-        f = self.partialfunc()
-        p_0 = [xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0]
-        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_flat, p_0)
-        mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
+            bmaj_0, bmin_0, pa_0 = popt
+            bmaj_0, bmin_0, pa_0, inv= self._correct_rotation(bmaj_0, bmin_0, pa_0)
 
-        xp, yp, bmaj, bmin, pa, ampl, offset = popt
-        xp_e, yp_e, bmaj_e, bmin_e, pa_e, ampl_e, offset_e = np.sqrt(np.diag(pcov))
-        bmaj, bmin, pa, inv = self._correct_rotation(bmaj, bmin, pa)
-        bmaj_e, bmin_e = (bmin_e, bmaj_e) if inv else (bmaj_e, bmin_e)
+            # step 5: all parameters
+            f = self.partialfunc()
+            p_0 = [xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0]
+            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_flat, p_0)
+            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
 
-        w = bmaj + bmin
-        mp_mask = (mg_daz>xp-w) & (mg_daz<xp+w) & (mg_del>yp-w) & (mg_del<yp+w)
-        mp_noise = np.ma.array(mp_data, mask=mp_mask)
-        sd = np.std(mp_noise)
-        sn = np.abs(ampl/sd)
-        chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
+            xp, yp, bmaj, bmin, pa, ampl, offset = popt
+            xp_e, yp_e, bmaj_e, bmin_e, pa_e, ampl_e, offset_e = np.sqrt(np.diag(pcov))
+            bmaj, bmin, pa, inv = self._correct_rotation(bmaj, bmin, pa)
+            bmaj_e, bmin_e = (bmin_e, bmaj_e) if inv else (bmaj_e, bmin_e)
 
-        # step 6: make header
-        hd_fit = fits.Header()
-        hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
+            sd = self._estimate_sd(mg_daz, mg_del, mp_data, bmaj, bmin)
+            sn = np.abs(ampl/sd)
+            chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
 
-        if sn >= sn_threshold:
+            # step 6: make header
             hd_fit['FIT_STAT'] = 'success', 'fiting status'
             hd_fit['FIT_CHI2'] = chi2, 'reduced Chi^2 (no unit)'
             hd_fit['FIT_SD']   = sd, 'S.D. of map (no unit)'
@@ -134,6 +133,7 @@ class Gaussian2D(object):
             hd_fit['ERR_PA']   = pa_e, 'position angle (degree)'
             hd_fit['ERR_AMPL'] = ampl_e, 'amplitude (no unit)'
             hd_fit['ERR_OFFS'] = offset_e, 'offset (no unit)'
+
         else:
             hd_fit['FIT_STAT'] = 'failed', 'fiting status'
 
@@ -201,6 +201,29 @@ class Gaussian2D(object):
         func = eval(func_str.format(args_fnew, args_f), locals())
 
         return func
+
+    @staticmethod
+    def _estimate_sd(mg_daz, mg_del, mp_data, xp, yp, bmaj, bmin):
+        '''Estimate S.D. of data using current fit parameters.
+
+        Args:
+        - mg_daz (2D array): meshgrid of dAz [arcsec]
+        - mg_del (2D array): meshgrid of dEl [arcsec]
+        - mp_data (2D array): data map [arbitrary unit]
+        - xp (float): Peak x (dAz) position of 2D Gaussian [arbitrary unit]
+        - yp (float): Peak y (dEl) position of 2D Gaussian [arbitrary unit]
+        - bmaj (float): Major beam size of 2D Gaussian [arbitrary unit]
+        - bmin (float): Minor beam size of 2D Gaussian [arbitrary unit]
+
+        Returns:
+        - sd_est (float): Estimated S.D. of data [arbitrary unit]
+        '''
+        w = bmaj + bmin
+        mp_mask = (mg_daz>xp-w) & (mg_daz<xp+w) & (mg_del>yp-w) & (mg_del<yp+w)
+        mp_noise = np.ma.array(mp_data, mask=mp_mask)
+        sd_est = np.std(mp_noise)
+
+        return sd_est
 
     @staticmethod
     def _correct_rotation(bmaj, bmin, pa):
