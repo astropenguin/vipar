@@ -35,5 +35,5 @@ def mbinit(version, status):
         mbglobals['go'] = go
         mbglobals['inp'] = inp
 
-    logger.post('Vipar - version {} ({})'.format(version, status))
+    logger.post('Vipar - version {0} ({1})'.format(version, status))
     logger.post('initial settings of Vipar finished')
