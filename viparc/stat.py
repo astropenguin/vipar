@@ -110,7 +110,7 @@ class Gaussian2D(object):
             bmaj, bmin, pa, inv = self._correct_rotation(bmaj, bmin, pa)
             bmaj_e, bmin_e = (bmin_e, bmaj_e) if inv else (bmaj_e, bmin_e)
 
-            sd = self._estimate_sd(mg_daz, mg_del, mp_data, bmaj, bmin)
+            sd = self._estimate_sd(mg_daz, mg_del, mp_data, xp, yp, bmaj, bmin)
             sn = np.abs(ampl/sd)
             chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
 
