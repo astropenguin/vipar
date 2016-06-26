@@ -1,6 +1,6 @@
 # Vipar - Visualization and Imaging Package for ASTE/TESCAM Reduction
 
-+ version: 0.2.3 (alpha)
++ version: 0.2.4 (alpha)
 + author: Akio Taniguchi (IoA, UTokyo)
 
 ## Summary
