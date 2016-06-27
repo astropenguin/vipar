@@ -1,6 +1,7 @@
 /vipar.py
 /vipardev.py
-/remove.sh
+/refresh.sh
+/release.sh
 *.pyc
 *.DS_Store
 
