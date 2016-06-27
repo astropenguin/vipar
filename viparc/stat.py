@@ -91,7 +91,6 @@ class Gaussian2D(object):
 
         gridsize = [np.mean(np.diff(mg)) for mg in (mg_daz, mg_del)]
         sigma = self.b_0 / (2*np.sqrt(np.log(2))) / np.linalg.norm(gridsize)
-
         mp_gauss = gaussian_filter(mp_data, sigma)
         peak_pos = np.max(mp_gauss) - np.median(mp_gauss)
         peak_neg = np.median(mp_gauss) - np.min(mp_gauss)
@@ -99,55 +98,70 @@ class Gaussian2D(object):
         j, i = np.unravel_index(argfunc(mp_gauss), mp_gauss.shape)
         xp_0, yp_0 = mg_daz[j,i], mg_del[j,i]
 
-        f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
-        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten())
+        try:
+            f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
+            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten())
+
         ampl_0, offset_0 = popt
 
-        # step 2: if initial S/N<3, then stop fitting
+        # step 2: if initial S/N<threshold, then stop fitting
         sd_0 = self._estimate_sd(xp_0, yp_0, bmaj_0, bmin_0)
         sn_0 = np.abs(ampl_0/sd_0)
         if sn_0 < threshold:
             return self._failed_results()
 
         # step 3: iterative fit
-        try:
-            cc = CheckConvergence()
-            while not cc(xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0):
-                # bmaj, bmin, pa
+        cc = CheckConvergence()
+        while not cc(xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0):
+            # bmaj, bmin, pa
+            try:
                 f = self.partial(xp=xp_0, yp=yp_0, ampl=ampl_0, offset=offset_0)
                 pinit = [bmaj_0, bmin_0, pa_0]
                 popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
-                bmaj_0, bmin_0, pa_0 = popt
-                bmaj_e, bmin_e, pa_e = np.sqrt(np.diag(pcov))
-                if bmaj_0 < bmin_0:
-                    bmaj_0, bmin_0 = bmin_0, bmaj_0
-                    bmaj_e, bmin_e = bmin_e, bmaj_e
-                    pa_0 += 90.0
+            except:
+                return self._failed_results()
 
-                pa_0 %= 180.0
+            bmaj_0, bmin_0, pa_0 = popt
+            bmaj_e, bmin_e, pa_e = np.sqrt(np.diag(pcov))
+            if bmaj_0 < bmin_0:
+                bmaj_0, bmin_0 = bmin_0, bmaj_0
+                bmaj_e, bmin_e = bmin_e, bmaj_e
+                pa_0 += 90.0
 
-                # xp, yp
+            pa_0 %= 180.0
+
+            # xp, yp
+            try:
                 f = self.partial(bmaj=bmaj_0, bmin=bmin_0, pa=pa_0, ampl=ampl_0, offset=offset_0)
                 pinit = [xp_0, yp_0]
                 popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
-                xp_0, yp_0 = popt
-                xp_e, yp_e = np.sqrt(np.diag(pcov))
+            except:
+                return self._failed_results()
 
-                # ampl, offset
+            xp_0, yp_0 = popt
+            xp_e, yp_e = np.sqrt(np.diag(pcov))
+
+            # ampl, offset
+            f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
+            pinit = [ampl_0, offset_0]
+            try:
                 f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
                 pinit = [ampl_0, offset_0]
                 popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
-                ampl_0, offset_0 = popt
-                ampl_e, offset_e = np.sqrt(np.diag(pcov))
+            except:
+                return self._failed_results()
+
+            ampl_0, offset_0 = popt
+            ampl_e, offset_e = np.sqrt(np.diag(pcov))
+
+        # step 4: fit all parameters
+        try:
+            f = self.partial()
+            pinit = np.array([xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0])
+            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
         except:
             return self._failed_results()
 
-        # step 4: fit all parameters
-        f = self.partial()
-        pinit = np.array([xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0])
-        psigma = np.array([xp_e, yp_e, bmaj_e, bmin_e, pa_e, ampl_e, offset_e])
-        pbounds = (pinit-psigma, pinit+psigma)
-        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit, bounds=pbounds)
         xp, yp, bmaj, bmin, pa, ampl, offset = popt
         xp_e, yp_e, bmaj_e, bmin_e, pa_e, ampl_e, offset_e = np.sqrt(np.diag(pcov))
         if bmaj < bmin:
@@ -157,13 +171,13 @@ class Gaussian2D(object):
 
         pa %= 180.0
 
-        mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
+        # step 5: if S/N<threshold, then return failed results
         sd = self._estimate_sd(xp, yp, bmaj, bmin)
         sn = np.abs(ampl/sd)
-        chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
-
-        # step 5: make header
-        if sn > threshold:
+        if sn < threshold:
+            return self._failed_results()
+        else:
+            chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
             hd_fit = fits.Header()
             hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
             hd_fit['FIT_STAT'] = 'success', 'fiting status'
@@ -184,10 +198,9 @@ class Gaussian2D(object):
             hd_fit['ERR_PA']   = pa_e, 'position angle (degree)'
             hd_fit['ERR_AMPL'] = ampl_e, 'amplitude (no unit)'
             hd_fit['ERR_OFFS'] = offset_e, 'offset (no unit)'
+            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
 
             return hd_fit, mp_fit
-        else:
-            return self._failed_results()
 
     @staticmethod
     def func((x, y), xp, yp, bmaj, bmin, pa, ampl, offset):
