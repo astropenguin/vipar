@@ -43,32 +43,45 @@ class PCA:
 
 
 class CheckConvergence(object):
-    def __init__(self, threshold=0.01):
+    def __init__(self, N_max=10, threshold=0.01):
+        self.N_max = N_max
+        self.N_call = 0
         self.threshold = threshold
-        self.p_prev = 0.0
 
     def __call__(self, *p_now):
-        p_now = np.array(p_now)
-        d_now = np.linalg.norm(p_now)
-        d_diff = np.linalg.norm(p_now - self.p_prev)
-        ratio = d_diff / d_now
-        self.p_prev = p_now
+        if self.N_call == 0:
+            p_now = np.array(p_now)
+            self.p_prev = p_now
+            self.N_call += 1
+            return False
 
-        return ratio <= self.threshold
+        elif 1 <= self.N_call <= self.N_max:
+            p_now = np.array(p_now)
+            p_diff = (p_now-self.p_prev)/self.p_prev
+            d_diff = np.linalg.norm(p_diff)
+            print('{0}: {1}'.format(self.N_call, d_diff)) # debug
+            self.p_prev = p_now
+            self.N_call += 1
+            return d_diff <= self.threshold
+
+        else:
+            raise Exception
 
 
 class Gaussian2D(object):
-    def __init__(self, b_0=23.0, threshold=3.0):
+    def __init__(self, b_0=23.0, pm='auto', threshold=5.0):
         '''Gaussian 2D fit class.
 
         Args:
         - b_0 (float): typical beam size for initial guess [arcsec]
+        - pm (str): +/- of Gaussian peak
         - threshold (float): threshold of S/N
         '''
         self.b_0 = float(b_0)
+        self.pm = pm
         self.threshold = threshold
 
-    def fit(self, mg_daz, mg_del, mp_data, b_0=23.0, threshold=3.0):
+    def __call__(self, mg_daz, mg_del, mp_data):
         '''Fit 2D Gaussian to a map.
 
         Args:
@@ -92,16 +105,20 @@ class Gaussian2D(object):
         gridsize = [np.mean(np.diff(mg)) for mg in (mg_daz, mg_del)]
         sigma = self.b_0 / (2*np.sqrt(np.log(2))) / np.linalg.norm(gridsize)
         mp_gauss = gaussian_filter(mp_data, sigma)
-        peak_pos = np.max(mp_gauss) - np.median(mp_gauss)
-        peak_neg = np.median(mp_gauss) - np.min(mp_gauss)
-        argfunc = np.argmax if peak_pos > peak_neg else np.argmin
+        if pm == 'auto':
+            peak_pos = np.max(mp_gauss) - np.median(mp_gauss)
+            peak_neg = np.median(mp_gauss) - np.min(mp_gauss)
+            argfunc = np.argmax if peak_pos > peak_neg else np.argmin
+        elif pm == 'positive':
+            argfunc = np.argmax
+        elif pm == 'negative':
+            argfunc = np.argmin
+
         j, i = np.unravel_index(argfunc(mp_gauss), mp_gauss.shape)
         xp_0, yp_0 = mg_daz[j,i], mg_del[j,i]
 
-        try:
-            f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
-            popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten())
-
+        f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
+        popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten())
         ampl_0, offset_0 = popt
 
         # step 2: if initial S/N<threshold, then stop fitting
@@ -112,47 +129,40 @@ class Gaussian2D(object):
 
         # step 3: iterative fit
         cc = CheckConvergence()
-        while not cc(xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0):
-            # bmaj, bmin, pa
-            try:
+        try:
+            while not cc(xp_0, yp_0, bmaj_0, bmin_0, pa_0, ampl_0, offset_0):
+                # bmaj, bmin, pa
                 f = self.partial(xp=xp_0, yp=yp_0, ampl=ampl_0, offset=offset_0)
                 pinit = [bmaj_0, bmin_0, pa_0]
                 popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
-            except:
-                return self._failed_results()
 
-            bmaj_0, bmin_0, pa_0 = popt
-            bmaj_e, bmin_e, pa_e = np.sqrt(np.diag(pcov))
-            if bmaj_0 < bmin_0:
-                bmaj_0, bmin_0 = bmin_0, bmaj_0
-                bmaj_e, bmin_e = bmin_e, bmaj_e
-                pa_0 += 90.0
+                bmaj_0, bmin_0, pa_0 = popt
+                bmaj_e, bmin_e, pa_e = np.sqrt(np.diag(pcov))
+                if bmaj_0 < bmin_0:
+                    bmaj_0, bmin_0 = bmin_0, bmaj_0
+                    bmaj_e, bmin_e = bmin_e, bmaj_e
+                    pa_0 += 90.0
 
-            pa_0 %= 180.0
+                pa_0 %= 180.0
 
-            # xp, yp
-            try:
+                # xp, yp
                 f = self.partial(bmaj=bmaj_0, bmin=bmin_0, pa=pa_0, ampl=ampl_0, offset=offset_0)
                 pinit = [xp_0, yp_0]
                 popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
-            except:
-                return self._failed_results()
 
-            xp_0, yp_0 = popt
-            xp_e, yp_e = np.sqrt(np.diag(pcov))
+                xp_0, yp_0 = popt
+                xp_e, yp_e = np.sqrt(np.diag(pcov))
 
-            # ampl, offset
-            f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
-            pinit = [ampl_0, offset_0]
-            try:
+                # ampl, offset
                 f = self.partial(xp=xp_0, yp=yp_0, bmaj=bmaj_0, bmin=bmin_0, pa=pa_0)
                 pinit = [ampl_0, offset_0]
                 popt, pcov = curve_fit(f, (mg_daz, mg_del), mp_data.flatten(), pinit)
-            except:
-                return self._failed_results()
 
-            ampl_0, offset_0 = popt
-            ampl_e, offset_e = np.sqrt(np.diag(pcov))
+                ampl_0, offset_0 = popt
+                ampl_e, offset_e = np.sqrt(np.diag(pcov))
+
+        except:
+            return self._failed_results()
 
         # step 4: fit all parameters
         try:
@@ -174,9 +184,12 @@ class Gaussian2D(object):
         # step 5: if S/N<threshold, then return failed results
         sd = self._estimate_sd(xp, yp, bmaj, bmin)
         sn = np.abs(ampl/sd)
-        if sn < threshold:
+        if np.ma.is_masked(sn):
+            return self._failed_results()
+        elif sn < threshold:
             return self._failed_results()
         else:
+            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
             chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
             hd_fit = fits.Header()
             hd_fit['FIT_FUNC'] = 'Gaussian2D', 'fitting function'
@@ -198,7 +211,6 @@ class Gaussian2D(object):
             hd_fit['ERR_PA']   = pa_e, 'position angle (degree)'
             hd_fit['ERR_AMPL'] = ampl_e, 'amplitude (no unit)'
             hd_fit['ERR_OFFS'] = offset_e, 'offset (no unit)'
-            mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
 
             return hd_fit, mp_fit
 
