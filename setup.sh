@@ -3,7 +3,7 @@
 # setup.sh - build Vipar tasks
 # author: Akio Taniguchi (IoA, UT)
 
-version="0.2.5"
+version="0.2.6"
 status="alpha"
 root=`pwd`
 
