@@ -15,6 +15,7 @@ else:
 
 # unique preamble
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 
 # definition of task
 def mbplotmap(raster='data', contour='fit', label=''):
@@ -23,4 +24,23 @@ def mbplotmap(raster='data', contour='fit', label=''):
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)
 
-    logger.post('not implemented yet!')
+    mbmp = mbglobals['__mbmaps__'][label]
+    mg_daz, mg_del = mbmp.getmeshgrid()
+
+    ax = plt.gca()
+    ax.set_xlim([np.min(mg_daz), np.max(mg_daz)])
+    ax.set_ylim([np.min(mg_del), np.max(mg_del)])
+    ax.set_xlabel('dAz (arcsec)')
+    ax.set_ylabel('dEl (arcsec)')
+
+    # raster map
+    mp = mbmp[raster].data
+    mp_raster = np.ma.array(mp, mask=np.isnan(mp))
+    ax.pcolormesh(mg_daz, mg_del, mp_raster, cmap='inferno')
+
+    # contour map (optional)
+    try:
+        mp_contour = mbmp[contour].data
+        ax.contour(mg_daz, mg_del, mp_contour)
+    except:
+        logger.post('fit map is not contained', 'WARN')
