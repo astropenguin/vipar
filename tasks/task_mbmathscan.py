@@ -41,7 +41,7 @@ def mbmathscan(expression='SC0+SC1', label0='', label1=''):
 
     # calculation
     try:
-        sc_new = eval(expression)
+        sc_new = eval(expression, mbglobals, locals())
     except:
         logger.post('an error occured', 'ERROR')
 
