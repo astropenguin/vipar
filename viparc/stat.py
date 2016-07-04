@@ -59,7 +59,6 @@ class CheckConvergence(object):
             p_now = np.array(p_now)
             p_diff = (p_now-self.p_prev)/self.p_prev
             d_diff = np.linalg.norm(p_diff)
-            print('{0}: {1}'.format(self.N_call, d_diff)) # debug
             self.p_prev = p_now
             self.N_call += 1
             return d_diff <= self.threshold
@@ -105,13 +104,13 @@ class Gaussian2D(object):
         gridsize = [np.mean(np.diff(mg)) for mg in (mg_daz, mg_del)]
         sigma = self.b_0 / (2*np.sqrt(np.log(2))) / np.linalg.norm(gridsize)
         mp_gauss = gaussian_filter(mp_data, sigma)
-        if pm == 'auto':
+        if self.pm == 'auto':
             peak_pos = np.max(mp_gauss) - np.median(mp_gauss)
             peak_neg = np.median(mp_gauss) - np.min(mp_gauss)
             argfunc = np.argmax if peak_pos > peak_neg else np.argmin
-        elif pm == 'positive':
+        elif self.pm == 'positive':
             argfunc = np.argmax
-        elif pm == 'negative':
+        elif self.pm == 'negative':
             argfunc = np.argmin
 
         j, i = np.unravel_index(argfunc(mp_gauss), mp_gauss.shape)
@@ -124,7 +123,7 @@ class Gaussian2D(object):
         # step 2: if initial S/N<threshold, then stop fitting
         sd_0 = self._estimate_sd(xp_0, yp_0, bmaj_0, bmin_0)
         sn_0 = np.abs(ampl_0/sd_0)
-        if sn_0 < threshold:
+        if sn_0 < self.threshold:
             return self._failed_results()
 
         # step 3: iterative fit
@@ -186,8 +185,10 @@ class Gaussian2D(object):
         sn = np.abs(ampl/sd)
         if np.ma.is_masked(sn):
             return self._failed_results()
-        elif sn < threshold:
+
+        elif sn < self.threshold:
             return self._failed_results()
+
         else:
             mp_fit = f((mg_daz, mg_del), *popt).reshape(mp_data.shape)
             chi2 = np.sum(((mp_data-mp_fit)/sd)**2) / mp_data.size
