@@ -18,19 +18,19 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
             <value>PCA</value>
         </param>
 
-        <param type="intArray" name="pixellist">
+        <param type="intArray" name="pixels">
             <description>list of pixel numbers</description>
-            <value></value>
-        </param>
-
-        <param type="string" name="label">
-            <description>label of pinned scan if necessary</description>
             <value></value>
         </param>
 
         <param type="double" name="fraction" subparam="true">
             <description>fraction of principal component</description>
             <value>0.9</value>
+        </param>
+
+        <param type="string" name="label">
+            <description>label of pinned scan if necessary</description>
+            <value></value>
         </param>
 
         <constraints>

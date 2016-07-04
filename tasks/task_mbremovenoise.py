@@ -17,7 +17,7 @@ else:
 from viparc.stat import PCA
 
 # definition of task
-def mbremovenoise(method='PCA', pixellist=[], label='', fraction=0.9):
+def mbremovenoise(method='PCA', pixels=[], fraction=0.9, label=''):
     depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
@@ -26,12 +26,12 @@ def mbremovenoise(method='PCA', pixellist=[], label='', fraction=0.9):
     mbsc = mbglobals['__mbscans__'][label]
     sc_old = mbsc['data'].data
 
-    if pixellist == []:
+    if pixels == []:
         logger.post('pixels used for estimation: all')
         sc_target = sc_old
     else:
-        logger.post('pixels used for estimation: {0}'.format(pixellist))
-        sc_target = sc_old[:,np.array(pixellist)-1]
+        logger.post('pixels used for estimation: {0}'.format(pixels))
+        sc_target = sc_old[:,np.array(pixels)-1]
 
     logger.post('method: {0}'.format(method))
     try:
@@ -48,11 +48,11 @@ def mbremovenoise(method='PCA', pixellist=[], label='', fraction=0.9):
     except:
         logger.post('an error occured', 'ERROR')
 
-    if pixellist == []:
+    if pixels == []:
         sc_new = sc_target - sc_noise
     else:
-        sc_new = np.zeros_like(sc_old)
-        sc_new[:,np.array(pixellist)-1] = sc_target - sc_noise
+        sc_new = sc_old
+        sc_new[:,np.array(pixels)-1] = sc_target - sc_noise
 
     mbsc['data'].data = sc_new
     mbsc.recordtask(taskname)
