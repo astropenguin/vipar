@@ -1,6 +1,6 @@
 # Vipar - Visualization and Imaging Package for ASTE/TESCAM Reduction
 
-+ version: 0.2.6 (alpha)
++ version: 0.3.0 (alpha)
 + author: Akio Taniguchi (IoA, UTokyo)
 
 ## Summary
@@ -13,7 +13,7 @@ Vipar is a visualization and imaging package for ASTE/TESCAM reduction.
     - we recommend to use CASA >= 4.5.0
 
 In the case of Mac OSX El Capitan, FITS I/O package `pyfits` is not included in CASA 4.6.0.
-This is a bug and reported to CASA developers by sending a ticket to ALMA Helpdesk.
+This is a bug and I reported to CASA developers by sending a ticket to ALMA Helpdesk.
 So please use Vipar with CASA < 4.6.0 for a while.
 
 ## Installation
