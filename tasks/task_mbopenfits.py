@@ -24,6 +24,7 @@ def mbopenfits(mbfits, mode='readonly', memmap=False):
     taskname = sys._getframe().f_code.co_name
     logger.origin(taskname)
 
+    mbfits = os.path.expanduser(mbfits)
     fitsname = os.path.basename(mbfits)
     logger.post('MBFITS: {0}'.format(fitsname))
 
