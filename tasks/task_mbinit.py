@@ -15,7 +15,7 @@ else:
 
 # unique preamble
 from viparc.data import ViparDB
-from viparc.tools import default, go, inp
+from viparc.utils import default, go, inp
 
 # definition of task
 def mbinit(version, status):
