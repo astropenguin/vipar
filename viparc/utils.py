@@ -1,7 +1,7 @@
 # coding: utf-8
 
 '''
-tools.py - Vipar's tool module
+tools.py - Vipar's utilities module
 
 + developer: Akio Taniguchi (IoA, UTokyo)
 + contact: taniguchi@ioa.s.u-tokyo.ac.jp
