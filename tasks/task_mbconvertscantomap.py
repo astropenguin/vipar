@@ -15,10 +15,10 @@ else:
 
 # unique preamble
 import pyfits as fits
-from viparc.map import SinglePixel
+from viparc.map import DefaultConverter, PointingConverter
 
 # definition of task
-def mbconvertscantomap(method='singlepixel', gridsize=[6,6], gridrefval=[0,0], label='', pixel=None):
+def mbconvertscantomap(method='default', rcpfile=None, pixels=[], gain='point', pixel=None, gridsizes=[6.0,6.0], gridrefvals=[0.0,0.0], label=''):
     depth = [s[3] for s in inspect.stack()].index('<module>')
     mbglobals = sys._getframe(depth).f_globals
     taskname = sys._getframe().f_code.co_name
@@ -26,9 +26,14 @@ def mbconvertscantomap(method='singlepixel', gridsize=[6,6], gridrefval=[0,0], l
 
     mbsc = mbglobals['__mbscans__'][label]
 
-    if method == 'singlepixel':
-        converter = SinglePixel(pixel, gridsize, gridrefval)
-        logger.post('method: single pixel')
+    if method == 'default':
+        rcpfile = os.path.expanduser(rcpfile)
+        converter = DefaultConverter(rcpfile, pixels, gain, gridsizes, gridrefvals)
+        logger.post('method: default')
+        logger.post('RCP: {0}'.format(os.path.basename(rcpfile)))
+    elif method == 'pointing':
+        converter = PointingConverter(pixel, gridsizes, gridrefvals)
+        logger.post('method: pointing')
         logger.post('pixel to be processed: {0}'.format(pixel))
 
     mbmp = mbsc.tomap(converter)

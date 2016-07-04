@@ -118,23 +118,25 @@ class MBScan(fits.HDUList):
     def fromfits(cls, f):
         mbsc = cls()
 
-        sc = np.squeeze(f['arraydata-mbfits'].data.DATA)
-        ts_mjd = f['datapar-mbfits'].data.MJD
-        ts_daz = f['datapar-mbfits'].data.LONGOFF
-        ts_del = f['datapar-mbfits'].data.LATOFF
-        alist = [ts_mjd, ts_daz, ts_del]
-        names = ['MJD', 'dAz', 'dEl']
-        dtypes = ['f8', 'f8', 'f8']
+        sc = np.squeeze(f['ARRAYDATA-MBFITS'].data.DATA)
+        ts_mjd = f['DATAPAR-MBFITS'].data['MJD']
+        ts_az  = f['DATAPAR-MBFITS'].data['AZIMUTH']
+        ts_el  = f['DATAPAR-MBFITS'].data['ELEVATIO']
+        ts_daz = f['DATAPAR-MBFITS'].data['LONGOFF'] * 3600.0 # arcsec
+        ts_del = f['DATAPAR-MBFITS'].data['LATOFF'] * 3600.0 # arcsec
+        alist = [ts_mjd, ts_az, ts_el, ts_daz, ts_del]
+        names = ['MJD', 'AZ', 'EL', 'DAZ', 'DEL']
+        dtypes = ['f8', 'f8', 'f8', 'f8', 'f8']
         record = np.rec.fromarrays(alist, zip(names, dtypes))
 
-        hdu_scan = fits.PrimaryHDU(sc)
+        hdu_data = fits.PrimaryHDU(sc)
         hdu_record = fits.BinTableHDU(record)
 
-        hdu_scan.header['ORIGIN'] = os.path.basename(f.filename())
-        hdu_scan.header['EXTNAME'] = 'DATA'
+        hdu_data.header['ORIGIN'] = os.path.basename(f.filename())
+        hdu_data.header['EXTNAME'] = 'DATA'
         hdu_record.header['EXTNAME'] = 'RECORD'
 
-        mbsc.append(hdu_scan)
+        mbsc.append(hdu_data)
         mbsc.append(hdu_record)
 
         return mbsc
@@ -147,16 +149,15 @@ class MBScan(fits.HDUList):
         pass
 
     def tomap(self, converter):
-        mp, header = converter(self)
-        record = self['record'].data
+        hdus = converter(self)
 
-        return MBMap.fromscan(mp, header, record)
+        return MBMap.fromscan(hdus)
 
     def recordtask(self, taskname):
-        if not 'TASKFLOW' in self['primary'].header.keys():
-            self['data'].header['TASKFLOW'] = taskname
+        if not 'TASKFLOW' in self['DATA'].header:
+            self['DATA'].header['TASKFLOW'] = taskname
         else:
-            self['data'].header['TASKFLOW'] += ' --> {0}'.format(taskname)
+            self['DATA'].header['TASKFLOW'] += ' --> {0}'.format(taskname)
 
 
 class MBMap(fits.HDUList):
@@ -164,18 +165,11 @@ class MBMap(fits.HDUList):
         fits.HDUList.__init__(self, hdus, file)
 
     @classmethod
-    def fromscan(cls, mp, header, record):
+    def fromscan(cls, hdus):
         mbmp = cls()
 
-        hdu_map = fits.PrimaryHDU(mp)
-        hdu_record = fits.BinTableHDU(record)
-
-        hdu_map.header['EXTNAME'] = 'DATA'
-        hdu_map.header += header
-        hdu_record.header['EXTNAME'] = 'RECORD'
-
-        mbmp.append(hdu_map)
-        mbmp.append(hdu_record)
+        for hdu in hdus:
+            mbmp.append(hdu)
 
         return mbmp
 
@@ -186,7 +180,7 @@ class MBMap(fits.HDUList):
         pass
 
     def getmeshgrid(self):
-        h = self['data'].header
+        h = self['DATA'].header
         grid_daz = h['CRVAL1'] + h['CDELT1']*(np.arange(h['NAXIS1'])+1-h['CRPIX1'])
         grid_del = h['CRVAL2'] + h['CDELT2']*(np.arange(h['NAXIS2'])+1-h['CRPIX2'])
         meshgrid = np.meshgrid(grid_daz, grid_del)
@@ -194,7 +188,7 @@ class MBMap(fits.HDUList):
         return meshgrid
 
     def recordtask(self, taskname):
-        if not 'TASKFLOW' in self['primary'].header.keys():
-            self['data'].header['TASKFLOW'] = taskname
+        if not 'TASKFLOW' in self['DATA'].header:
+            self['DATA'].header['TASKFLOW'] = taskname
         else:
-            self['data'].header['TASKFLOW'] += ' --> {0}'.format(taskname)
+            self['DATA'].header['TASKFLOW'] += ' --> {0}'.format(taskname)

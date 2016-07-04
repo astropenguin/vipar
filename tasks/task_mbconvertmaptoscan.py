@@ -15,7 +15,6 @@ else:
 
 # unique preamble
 import pyfits as fits
-from viparc.map import SinglePixel
 
 # definition of task
 def mbconvertmaptoscan(label=''):

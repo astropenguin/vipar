@@ -15,15 +15,35 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
         <param type="string" name="method">
             <description>convert method</description>
-            <value>singlepixel</value>
+            <value>default</value>
         </param>
 
-        <param type="doubleArray" name="gridsize">
+        <param type="string" name="rcpfile" subparam="true">
+            <description>name of RCP file (*.json)</description>
+            <value></value>
+        </param>
+
+        <param type="intArray" name="pixels" subparam="true">
+            <description>list of pixel numbers</description>
+            <value></value>
+        </param>
+
+        <param type="string" name="gain" subparam="true">
+            <description>type of gain</description>
+            <value>point</value>
+        </param>
+
+        <param type="int" name="pixel" subparam="true">
+            <description>pixel number</description>
+            <value>1</value>
+        </param>
+
+        <param type="doubleArray" name="gridsizes">
             <description>grid sizes of dAz and dEl</description>
             <value>6.0, 6.0</value>
         </param>
 
-        <param type="doubleArray" name="gridrefval">
+        <param type="doubleArray" name="gridrefvals">
             <description>grid reference values of dAz and dEl</description>
             <value>0.0, 0.0</value>
         </param>
@@ -33,15 +53,15 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
             <value></value>
         </param>
 
-        <param type="int" name="pixel" subparam="true">
-            <description>pixel No.</description>
-            <value>1</value>
-        </param>
-
         <constraints>
 
             <when param="method">
-                <equals type="string" value="singlepixel">
+                <equals type="string" value="default">
+                    <default param="rcpfile"><value></value></default>
+                    <default param="pixels"><value></value></default>
+                    <default param="gain"><value>point</value></default>
+                </equals>
+                <equals type="string" value="pointing">
                     <default param="pixel"><value>1</value></default>
                 </equals>
             </when>
