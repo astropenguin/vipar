@@ -26,14 +26,13 @@ def mbfitmap(method='Gaussian2D', label=''):
 
     mbmp = mbglobals['__mbmaps__'][label]
 
-    logger.post('pixel {0}'.format(mbmp['data'].header['PIXEL']))
     mp_data = mbmp['data'].data
     mg_daz, mg_del = mbmp.getmeshgrid()
 
     if method == 'Gaussian2D':
         fitter = Gaussian2D()
 
-    hd_fit, mp_fit = fitter.fit(mg_daz, mg_del, mp_data)
+    hd_fit, mp_fit = fitter(mg_daz, mg_del, mp_data)
 
     for i in range(len(hd_fit)):
         try:
