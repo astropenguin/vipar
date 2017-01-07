@@ -57,9 +57,9 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
             <when param="method">
                 <equals type="string" value="default">
-                    <default param="rcpfile"><value></value></default>
-                    <default param="pixels"><value></value></default>
-                    <default param="gain"><value>point</value></default>
+                    <default param="rcpfile"><value type="string"></value></default>
+                    <default param="pixels"><value type="string"></value></default>
+                    <default param="gain"><value type="string">point</value></default>
                 </equals>
                 <equals type="string" value="pointing">
                     <default param="pixel"><value>1</value></default>
