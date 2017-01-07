@@ -13,12 +13,12 @@ file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
     <input>
 
-        <param type="string" name="version" mustexist="true">
+        <param type="string" name="version">
             <description>version No. of Vipar</description>
             <value></value>
         </param>
 
-        <param type="string" name="status" mustexist="true">
+        <param type="string" name="status">
             <description>development status of Vipar</description>
             <value></value>
         </param>
